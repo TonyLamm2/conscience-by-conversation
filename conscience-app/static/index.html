@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conscience by Conversation</title>
+<style>
+:root{
+  --bg:#f6f4ef; --panel:#fffdf8; --ink:#1f2328; --muted:#646b73; --line:#e2ddd2;
+  --accent:#7a4b14; --accent-ink:#fff;
+  --trainer:#eef3fb; --trainer-line:#9db6dc; --learner:#f2f7ee; --learner-line:#a5c493;
+  --director:#fbf1e3; --director-line:#d9a65d; --judge:#f4eefa; --judge-line:#b69ad6;
+  --warn:#9a3412; --ok:#2f6b2f;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#16181b; --panel:#1e2125; --ink:#e7e5df; --muted:#9aa0a6; --line:#33373c;
+  --accent:#d39a55; --accent-ink:#1a1206;
+  --trainer:#1c2633; --trainer-line:#3f5f8c; --learner:#1d2a1d; --learner-line:#4f7a45;
+  --director:#2e2416; --director-line:#8c6630; --judge:#271f31; --judge-line:#6e5591;
+  --warn:#f0a070; --ok:#8fcf8f;
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Georgia,"Iowan Old Style","Palatino Linotype",serif}
+header{padding:14px 20px 0;border-bottom:1px solid var(--line);background:var(--panel)}
+header h1{margin:0;font-size:20px;letter-spacing:.2px}
+header .sig{color:var(--muted);font-style:italic;font-size:13px;margin:2px 0 10px}
+nav{display:flex;gap:4px;flex-wrap:wrap}
+nav button{border:0;background:none;padding:8px 14px;font:inherit;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent}
+nav button.on{color:var(--ink);border-bottom-color:var(--accent)}
+main{max-width:1180px;margin:0 auto;padding:18px 16px 60px}
+.tab{display:none}.tab.on{display:block}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.grid{display:grid;grid-template-columns:330px 1fr;gap:18px}
+@media (max-width:900px){.grid{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:14px}
+.card h3{margin:0 0 10px;font-size:15px}
+label{display:block;font-size:12px;color:var(--muted);margin:8px 0 3px;font-family:system-ui,sans-serif}
+input,select,textarea{width:100%;font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;padding:7px 8px;border:1px solid var(--line);border-radius:5px;background:var(--bg);color:var(--ink)}
+textarea{resize:vertical}
+input[type=checkbox]{width:auto}
+button.b{font:13px system-ui,sans-serif;padding:7px 12px;border-radius:5px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+button.b:hover{border-color:var(--accent)}
+button.p{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.status{font:12px system-ui,sans-serif;color:var(--muted)}
+.status b{color:var(--ink)}
+.msg{border-left:3px solid;border-radius:6px;padding:10px 12px;margin:10px 0}
+.msg .who{font:600 12px system-ui,sans-serif;letter-spacing:.4px;margin-bottom:4px;display:flex;justify-content:space-between;gap:8px}
+.msg .who span{font-weight:400;color:var(--muted)}
+.TRAINER{background:var(--trainer);border-color:var(--trainer-line)}
+.LEARNER{background:var(--learner);border-color:var(--learner-line)}
+.DIRECTOR{background:var(--director);border-color:var(--director-line)}
+.JUDGE{background:var(--judge);border-color:var(--judge-line)}
+.FILLER{background:transparent;border-color:var(--line);font-size:12px;color:var(--muted);padding:4px 10px;margin:4px 0}
+.withdrawn{opacity:.5}
+details.notes{margin-top:8px;font-size:13px;color:var(--muted)}
+details.notes summary{cursor:pointer;font-family:system-ui,sans-serif;font-size:12px}
+.warn{color:var(--warn);font:12px system-ui,sans-serif;margin-top:6px}
+pre.block{white-space:pre-wrap;font:12.5px/1.45 ui-monospace,Menlo,Consolas,monospace;background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:8px;margin:6px 0}
+.md p{margin:.4em 0}.md ul,.md ol{margin:.3em 0 .3em 1.2em;padding:0}.md blockquote{margin:.6em 0;padding:.2em .9em;border-left:3px solid var(--accent);color:var(--ink)}
+.md h1{font-size:22px}.md h2{font-size:17px;margin-top:1.2em}.md h3{font-size:14px;color:var(--muted);font-weight:normal}
+.md code{font-size:12.5px;background:var(--bg);padding:1px 4px;border-radius:3px}
+table{width:100%;border-collapse:collapse;font:13px system-ui,sans-serif}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:500}
+tr.click{cursor:pointer}tr.click:hover td{background:var(--bg)}
+.pill{display:inline-block;font:11px system-ui,sans-serif;padding:1px 7px;border-radius:9px;border:1px solid var(--line)}
+.pill.closed{color:var(--ok);border-color:var(--ok)}
+.pill.running{color:var(--accent);border-color:var(--accent)}
+.note{font:13px system-ui,sans-serif;color:var(--muted)}
+.exp{font:12px system-ui,sans-serif;color:var(--warn)}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:6px;font:13px system-ui,sans-serif;display:none;max-width:90vw}
+.empty{color:var(--muted);font-style:italic;padding:20px 0}
+.credit{text-align:center;color:var(--muted);font-size:12px;margin-top:30px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Conscience by Conversation</h1>
+  <div class="sig">"The way is the conversation. Over and over until what is said is truth." — Draft 0.3 · Muse and Tony Lamm</div>
+  <nav id="nav">
+    <button data-t="run" class="on">Run</button>
+    <button data-t="records">Records</button>
+    <button data-t="prompts">Prompts &amp; cases</button>
+    <button data-t="settings">Settings</button>
+    <button data-t="charter">Charter</button>
+  </nav>
+</header>
+<main>
+
+<!-- RUN -->
+<section class="tab on" id="t-run">
+ <div class="grid">
+  <div>
+   <div class="card">
+    <h3>New session</h3>
+    <label>Case</label><select id="case"></select>
+    <div id="customBox" style="display:none">
+      <label>Custom case (what the Trainer should present)</label>
+      <textarea id="custom" rows="4"></textarea>
+      <label>Stage</label><select id="customStage"></select>
+    </div>
+    <label>Test variant</label><select id="variant"></select>
+    <label>Session mode</label><select id="mode"></select>
+    <div id="modeNote" class="exp" style="display:none;margin-top:4px">Experimental — Tony's Oct 20, 2026 proposal under test, not Draft 0.3 canon.</div>
+    <div class="ctrl"><button class="b p" id="start">Start session</button></div>
+    <div class="note" id="who"></div>
+   </div>
+   <div class="card">
+    <h3>Director</h3>
+    <div class="status" id="stat">No session open.</div>
+    <div class="ctrl">
+      <button class="b p" id="run">Run</button>
+      <button class="b" id="pause">Pause</button>
+      <button class="b" id="stepb">Step</button>
+      <button class="b" id="stop">Stop</button>
+    </div>
+    <label>Say something (labeled DIRECTOR in the transcript)</label>
+    <textarea id="dtext" rows="3" placeholder="Inject a case, correct either AI, or redirect…"></textarea>
+    <div class="row" style="margin-top:6px">
+      <select id="dtarget" style="width:auto"><option value="trainer">to Trainer</option><option value="learner">to Learner</option></select>
+      <button class="b" id="dsend">Send</button>
+      <button class="b" id="score">Ask for scores</button>
+    </div>
+    <div class="ctrl" style="margin-top:12px">
+      <button class="b" id="drift">Context-drift test</button>
+      <button class="b" id="judgeb">Run judge</button>
+    </div>
+    <div class="note" id="driftNote">Sends 30 unrelated questions to the Learner only, then asks the Trainer to re-test the principle with no original cues.</div>
+   </div>
+   <div class="card">
+    <h3>Export this session</h3>
+    <div class="ctrl">
+      <button class="b" id="xt">Transcript (.md)</button>
+      <button class="b" id="xr">Lesson Record (.md)</button>
+      <button class="b" id="xc">Copy transcript</button>
+    </div>
+   </div>
+  </div>
+  <div>
+   <div class="card">
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <h3 id="title" style="margin:0">Transcript</h3>
+      <span class="status" id="phase"></span>
+    </div>
+    <div id="transcript"><div class="empty">Start a session, or open one from Records.</div></div>
+    <div id="recordBox"></div>
+    <div id="logBox"></div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- RECORDS -->
+<section class="tab" id="t-records">
+ <div class="card">
+  <h3>Where your sessions live</h3>
+  <p class="note">Every session is saved to a file on this computer after every turn, in the <code>sessions</code> folder next to <code>app.py</code>: <code id="folder"></code>. Refreshing or closing this page loses nothing.</p>
+  <div class="ctrl">
+    <button class="b p" id="xall">Download charter + all records (.md)</button>
+    <button class="b" id="xsft">Download training data (.jsonl)</button>
+    <label style="display:inline;margin:0 4px 0 8px">min score</label>
+    <select id="minScore" style="width:auto"><option>2</option><option selected>3</option><option>4</option></select>
+  </div>
+  <p class="note">Training data includes the Learner's side of closed sessions where Behavior and Reason Chain both meet the minimum. The independent judge's scores are used when present; otherwise the Trainer's.</p>
+ </div>
+ <div class="card">
+  <h3>Sessions</h3>
+  <table><thead><tr><th>Started</th><th>Case</th><th>Stage</th><th>Variant / mode</th><th>Status</th><th>Transfer</th><th>Trainer</th><th>Judge</th></tr></thead>
+  <tbody id="rows"></tbody></table>
+ </div>
+</section>
+
+<!-- PROMPTS -->
+<section class="tab" id="t-prompts">
+ <div class="card">
+  <h3>Edit prompts, charter, and cases</h3>
+  <div class="row">
+    <div style="flex:1;min-width:220px"><label>File</label>
+     <select id="fname">
+      <option value="charter">Charter (inserted into every prompt at {{CHARTER}})</option>
+      <option value="trainer">AI-1 Trainer prompt</option>
+      <option value="learner">AI-2 Learner prompt</option>
+      <option value="judge">Independent judge prompt</option>
+      <option value="ext_warning_ratio">Experimental: warning-ratio mode</option>
+      <option value="ext_dangerous_tax">Experimental: dangerous-tax mode</option>
+      <option value="cases">Cases (cases.json)</option>
+      <option value="filler">Drift-test questions (filler.txt)</option>
+      <option value="notebook">Learner's conscience notebook</option>
+     </select></div>
+    <button class="b p" id="fsave">Save</button>
+    <button class="b" id="freload">Reload</button>
+  </div>
+  <p class="note" id="fpath"></p>
+  <textarea id="fbody" rows="30"></textarea>
+  <p class="note">Changes apply to new sessions. Each session keeps a copy of the exact prompts it started with, so old records stay accurate. The notebook only grows from sessions that pass transfer; you can edit or clear it here.</p>
+ </div>
+</section>
+
+<!-- SETTINGS -->
+<section class="tab" id="t-settings">
+ <p class="note">Keys are saved only in <code>config.json</code> on this computer, never shown here after saving, and never written into transcripts, records, or exports. "OpenAI-compatible" covers Ollama (<code>http://localhost:11434/v1</code>), LM Studio (<code>http://localhost:1234/v1</code>), llama.cpp server, vLLM, OpenAI, OpenRouter and similar. "Demo" runs canned text with no AI so you can try the controls.</p>
+ <div id="aiCards"></div>
+ <div class="card">
+  <h3>Session settings</h3>
+  <label><input type="checkbox" id="useNb"> Use the conscience notebook (add lessons that passed transfer to the Learner's prompt)</label>
+  <label>Turn limit per session</label><input id="maxTurns" type="number" min="4" max="400" style="width:120px">
+ </div>
+ <div class="ctrl"><button class="b p" id="saveCfg">Save settings</button></div>
+</section>
+
+<!-- CHARTER -->
+<section class="tab" id="t-charter">
+ <div class="card md" id="charter"></div>
+ <p class="note">Edit the charter under Prompts &amp; cases.</p>
+</section>
+
+<div class="credit">Muse and Tony Lamm</div>
+</main>
+<div id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+let S = null, cur = null, running = false, busy = false;
+
+function toast(m, ms=3500){const t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(t._h);t._h=setTimeout(()=>t.style.display='none',ms)}
+async function api(p, body){
+  const r = await fetch(p, body===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const j = await r.json(); if(j.error) throw new Error(j.error); return j;
+}
+const esc = s => (s||'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function inline(s){return s.replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>').replace(/(^|[^*])\*([^*\n]+)\*/g,'$1<i>$2</i>')}
+function md(src){
+  const lines = esc(src||'').split('\n'); let h='', list=null, inCode=false, code=[];
+  const close=()=>{if(list){h+=`</${list}>`;list=null}};
+  for(const l of lines){
+    if(l.startsWith('```')){ if(inCode){h+=`<pre class="block">${code.join('\n')}</pre>`;code=[];inCode=false}else{close();inCode=true} continue }
+    if(inCode){code.push(l);continue}
+    let m;
+    if(m=l.match(/^(#{1,3}) (.*)/)){close();h+=`<h${m[1].length}>${inline(m[2])}</h${m[1].length}>`}
+    else if(m=l.match(/^&gt; ?(.*)/)){close();h+=`<blockquote>${inline(m[1])}</blockquote>`}
+    else if(m=l.match(/^\s*[-*] (.*)/)){if(list!=='ul'){close();h+='<ul>';list='ul'}h+=`<li>${inline(m[1])}</li>`}
+    else if(m=l.match(/^\s*\d+\. (.*)/)){if(list!=='ol'){close();h+='<ol>';list='ol'}h+=`<li>${inline(m[1])}</li>`}
+    else if(!l.trim()){close()}
+    else {close();h+=`<p>${inline(l)}</p>`}
+  }
+  close(); if(inCode) h+=`<pre class="block">${code.join('\n')}</pre>`; return h;
+}
+
+// ---------- tabs
+$('nav').onclick = e => { const t=e.target.dataset.t; if(!t) return;
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.id==='t-'+t));
+  if(t==='records') loadState(); if(t==='prompts') loadFile();
+};
+
+// ---------- state
+async function loadState(){
+  S = await api('/api/state');
+  const c = $('case'), keep = c.value;
+  c.innerHTML = S.cases.map(x=>`<option value="${esc(String(x.id))}">${esc(x.title)} — ${x.stage?('Stage '+x.stage):'cross-stage'}</option>`).join('') + '<option value="custom">Custom case…</option>';
+  if(keep) c.value = keep;
+  $('customStage').innerHTML = Object.entries(S.stages).map(([k,v])=>`<option value="${k}">${k} — ${esc(v)}</option>`).join('');
+  $('variant').innerHTML = S.variants.map(v=>`<option>${esc(v)}</option>`).join('');
+  const ml = {standard:'Standard', warning_ratio:'Warning ratio (experimental)', dangerous_tax:'Dangerous tax (experimental)'};
+  if(!$('mode').options.length) $('mode').innerHTML = S.modes.map(m=>`<option value="${m}">${ml[m]||m}</option>`).join('');
+  $('charter').innerHTML = md(S.charter);
+  $('folder').textContent = S.folder + '/sessions';
+  renderRows(); renderSettings(); whoLine();
+}
+function whoLine(){
+  const c=S.config, lab=r=>{const a=(r!=='trainer'&&c[r].use_trainer)?c.trainer:c[r]; return a.provider==='demo'?'DEMO':(a.model||'(no model set)')};
+  $('who').innerHTML = `Trainer: <b>${esc(lab('trainer'))}</b> · Learner: <b>${esc(lab('learner'))}</b>` +
+    (c.learner.use_trainer?' <span class="exp">(same connection — the Learner\'s answers are less independent)</span>':'') +
+    (c.judge.enabled?` · Judge: <b>${esc(lab('judge'))}</b>`:'');
+}
+$('case').onchange = () => { const v=$('case').value; $('customBox').style.display = v==='custom'?'block':'none';
+  const cs = S.cases.find(x=>String(x.id)===v); if(cs && cs.mode){$('mode').value=cs.mode} else if(cs){$('mode').value='standard'} $('mode').onchange(); };
+$('mode').onchange = () => $('modeNote').style.display = $('mode').value==='standard'?'none':'block';
+
+// ---------- run
+function render(){
+  const s = cur; if(!s) return;
+  $('title').textContent = `${s.case.title} · ${s.id}`;
+  $('phase').textContent = s.phase ? `Phase: ${s.phase}` : '';
+  $('stat').innerHTML = `<b>${s.status}</b> · turn ${s.turn} · next: ${s.status==='running'?s.next:'—'} · variant: ${esc(s.variant)} · mode: ${esc(s.mode)}${running?' · <b>running…</b>':''}${busy&&!running?' · <b>working…</b>':''}`;
+  const T = $('transcript'); T.innerHTML = '';
+  for(const e of s.transcript){
+    const d = document.createElement('div'); d.className = 'msg '+e.who+(e.withdrawn?' withdrawn':'');
+    if(e.who==='TRAINER'){
+      d.innerHTML = `<div class="who">AI-1 TRAINER <span>${esc(e.phase||'')}${e.withdrawn?' · withdrawn':''}</span></div><div class="md">${e.text?md(e.text):'<i>(no message to Learner)</i>'}</div>` +
+        (e.notes?`<details class="notes"><summary>Trainer notes (private)</summary><div class="md">${md(e.notes)}</div></details>`:'') +
+        (e.warn?`<div class="warn">⚠ ${esc(e.warn)}</div>`:'');
+    } else if(e.who==='LEARNER'){
+      d.innerHTML = `<div class="who">AI-2 LEARNER</div><div class="md">${md(e.text)}</div>`;
+    } else if(e.who==='DIRECTOR'){
+      d.innerHTML = `<div class="who">DIRECTOR <span>to ${esc(e.to||'')}</span></div><div class="md">${md(e.text)}</div>`;
+    } else if(e.who==='JUDGE'){
+      d.innerHTML = `<div class="who">INDEPENDENT JUDGE</div><pre class="block">${esc(e.text)}</pre>`;
+    } else if(e.who==='FILLER'){
+      d.innerHTML = `drift · Q: ${esc(e.text)} — A: ${esc((e.answer||'').slice(0,140))}…`;
+    }
+    T.appendChild(d);
+  }
+  $('recordBox').innerHTML = s.record || s.scores ? `<h3 style="margin-top:18px">Lesson Record</h3><pre class="block">${esc(s.record||'(none)')}</pre><h3>Trainer scores</h3><pre class="block">${esc(s.scores||'(none)')}</pre>` + (s.judge?`<h3>Independent judge</h3><pre class="block">${esc(s.judge)}</pre>`:'') : '';
+  $('logBox').innerHTML = s.log && s.log.length ? `<details class="notes" open><summary>Session log</summary><pre class="block">${esc(s.log.join('\n'))}</pre></details>` : '';
+  const live = s.status==='running';
+  $('run').disabled = !live || running; $('stepb').disabled = !live || running || busy; $('pause').disabled = !running;
+  $('stop').disabled = !live && !running;
+}
+async function doStep(){
+  busy = true; render();
+  try { cur = await api('/api/step', {id:cur.id}); }
+  catch(e){ running=false; toast(e.message, 8000); try{cur = await api('/api/session?id='+cur.id)}catch(_){} }
+  busy = false; render(); window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
+}
+$('start').onclick = async () => {
+  try{
+    cur = await api('/api/start', {case_id:$('case').value, custom:$('custom').value, custom_stage:$('customStage').value, variant:$('variant').value, mode:$('mode').value});
+    render(); toast('Session started. Press Run or Step.');
+  }catch(e){toast(e.message,8000)}
+};
+$('run').onclick = async () => { if(!cur) return; running = true; render();
+  while(running && cur.status==='running'){ await doStep(); }
+  running = false; render(); if(cur.status==='closed') toast('Session closed. The Lesson Record is below the transcript.');
+};
+$('pause').onclick = () => { running = false; toast('Pausing after the current turn.'); render(); };
+$('stepb').onclick = () => cur && doStep();
+$('stop').onclick = async () => { running=false; if(!cur) return; cur = await api('/api/stop',{id:cur.id}); render(); };
+$('dsend').onclick = async () => { if(!cur) return toast('Open a session first.');
+  try{ cur = await api('/api/director',{id:cur.id,target:$('dtarget').value,text:$('dtext').value}); $('dtext').value=''; render(); toast('Sent. Press Run or Step to continue.'); }catch(e){toast(e.message,6000)} };
+$('score').onclick = async () => { if(!cur) return;
+  cur = await api('/api/director',{id:cur.id,target:'trainer',text:'Give interim scores for the Learner now, inside <scores> in your usual format (in trainer_notes), then continue the session.'}); render(); doStep(); };
+$('drift').onclick = async () => { if(!cur) return;
+  if(!confirm('Send 30 unrelated questions to the Learner, then re-test? This makes 30+ model calls.')) return;
+  running = true; render();
+  try{
+    for(let i=0;i<30 && running;i++){ $('driftNote').textContent=`Drift: ${i+1} / 30…`; cur = await api('/api/drift',{id:cur.id,i:(cur.drift_done||0)}); render(); }
+    if(running){ cur = await api('/api/director',{id:cur.id,target:'trainer',text:'Context-drift test: 30 turns of unrelated conversation have passed in the Learner\'s conversation. Re-test the principle from this session with a new case that contains none of the original cues or wording. Do not mention the earlier case.'}); }
+  }catch(e){toast(e.message,8000)}
+  $('driftNote').textContent='Sends 30 unrelated questions to the Learner only, then asks the Trainer to re-test the principle with no original cues.';
+  running=false; render(); toast('Drift done. Press Run to watch the re-test.');
+};
+$('judgeb').onclick = async () => { if(!cur) return; busy=true; render();
+  try{ cur = await api('/api/judge',{id:cur.id}); toast('Judge scores added.'); }catch(e){toast(e.message,8000)} busy=false; render(); };
+const dl = u => { const a=document.createElement('a'); a.href=u; document.body.appendChild(a); a.click(); a.remove(); };
+$('xt').onclick = () => cur ? dl('/export/transcript?id='+cur.id) : toast('Open a session first.');
+$('xr').onclick = () => cur ? dl('/export/record?id='+cur.id) : toast('Open a session first.');
+$('xc').onclick = async () => { if(!cur) return; const t = await (await fetch('/export/transcript?id='+cur.id)).text();
+  try{ await navigator.clipboard.writeText(t); toast('Transcript copied.'); }catch(_){ toast('Copy blocked by the browser; use the download button.'); } };
+$('xall').onclick = () => dl('/export/all');
+$('xsft').onclick = () => dl('/export/sft?min='+$('minScore').value);
+
+// ---------- records
+function renderRows(){
+  const r = S.sessions;
+  $('rows').innerHTML = r.length ? r.map(x=>`<tr class="click" data-id="${x.id}"><td>${esc((x.created||'').replace('T',' '))}</td><td>${esc(x.title)}</td><td>${x.stage||'—'}</td><td>${esc(x.variant)} / ${esc(x.mode)}</td><td><span class="pill ${x.status}">${x.status}</span> ${x.turn}t</td><td>${esc(x.test_status||'')}</td><td>${esc(x.trainer_scores)}</td><td>${esc(x.judge_scores)}</td></tr>`).join('')
+    : '<tr><td colspan="8" class="empty">No sessions yet.</td></tr>';
+  document.querySelectorAll('#rows tr.click').forEach(tr=>tr.onclick=async()=>{ cur = await api('/api/session?id='+tr.dataset.id); document.querySelector('nav button[data-t=run]').click(); render(); });
+}
+
+// ---------- prompts
+async function loadFile(){ const f = await api('/api/file?name='+$('fname').value); $('fbody').value=f.content; $('fpath').textContent='File: '+f.path; }
+$('fname').onchange = loadFile; $('freload').onclick = loadFile;
+$('fsave').onclick = async () => { try{ const r = await api('/api/file',{name:$('fname').value,content:$('fbody').value}); toast('Saved '+r.saved); loadState(); }catch(e){toast(e.message,8000)} };
+
+// ---------- settings
+const ROLES = [['trainer','AI-1 — Trainer'],['learner','AI-2 — Learner'],['judge','Independent judge (optional, recommended)']];
+function renderSettings(){
+  const c = S.config;
+  $('aiCards').innerHTML = ROLES.map(([r,name])=>{ const a=c[r]; return `<div class="card" data-r="${r}"><h3>${name}</h3>
+    ${r==='judge'?`<label><input type="checkbox" data-k="enabled" ${a.enabled?'checked':''}> Score every closed session with an independent judge (it sees the conversation, not the Trainer's notes or scores)</label>`:''}
+    ${r!=='trainer'?`<label><input type="checkbox" data-k="use_trainer" ${a.use_trainer?'checked':''}> ${r==='judge'?"Use the Trainer's connection (a different model judges more independently)":"Use the Trainer's connection (one model plays both roles)"}</label>`:''}
+    <div class="row">
+      <div style="flex:1;min-width:150px"><label>Provider</label><select data-k="provider">
+        <option value="openai" ${a.provider==='openai'?'selected':''}>OpenAI-compatible</option>
+        <option value="anthropic" ${a.provider==='anthropic'?'selected':''}>Anthropic</option>
+        <option value="demo" ${a.provider==='demo'?'selected':''}>Demo (no AI)</option></select></div>
+      <div style="flex:2;min-width:220px"><label>Endpoint URL</label><input data-k="base_url" value="${esc(a.base_url)}"></div>
+      <div style="flex:1;min-width:150px"><label>Model name</label><input data-k="model" value="${esc(a.model)}" placeholder="e.g. llama3.1:8b"></div>
+    </div>
+    <div class="row">
+      <div style="flex:2;min-width:220px"><label>API key ${a.has_key?'(saved — type a new one to replace)':'(leave blank for local models)'}</label><input data-k="api_key" type="password" autocomplete="off"></div>
+      ${a.has_key?`<label style="margin-bottom:8px"><input type="checkbox" data-k="clear_key"> clear saved key</label>`:''}
+      <div style="width:110px"><label>Temperature</label><input data-k="temperature" type="number" step="0.1" min="0" max="2" value="${a.temperature}"></div>
+      <div style="width:120px"><label>Max tokens</label><input data-k="max_tokens" type="number" min="64" value="${a.max_tokens}"></div>
+      <button class="b" data-test="${r}">Test connection</button>
+    </div><div class="note" data-res="${r}"></div></div>`}).join('');
+  $('useNb').checked = !!c.use_notebook; $('maxTurns').value = c.max_turns;
+  document.querySelectorAll('[data-test]').forEach(b=>b.onclick=async()=>{ const r=b.dataset.test, out=document.querySelector(`[data-res=${r}]`);
+    out.textContent='Testing… (save settings first if you changed them)';
+    try{ const j=await api('/api/test',{role:r}); out.textContent=`OK in ${j.seconds}s — ${j.model} replied: "${j.reply}"`; }catch(e){ out.textContent='Failed: '+e.message } });
+}
+$('saveCfg').onclick = async () => {
+  const body = {use_notebook:$('useNb').checked, max_turns:parseInt($('maxTurns').value)||40};
+  document.querySelectorAll('#aiCards .card').forEach(card=>{ const r=card.dataset.r, o={};
+    card.querySelectorAll('[data-k]').forEach(i=>{ const k=i.dataset.k;
+      o[k] = i.type==='checkbox' ? i.checked : (i.type==='number' ? parseFloat(i.value) : i.value); });
+    body[r]=o; });
+  try{ await api('/api/config', body); await loadState(); toast('Settings saved.'); }catch(e){toast(e.message,8000)}
+};
+
+loadState().then(()=>{ $('case').onchange(); }).catch(e=>toast('Could not reach the app: '+e.message, 10000));
+</script>
+</body>
+</html>
