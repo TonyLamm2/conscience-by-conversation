@@ -25,9 +25,12 @@ penalty? We test behavior, not whether it can recite "honesty is important."
 
 ## Philosophical foundation
 
-The human moral starting point is that we exist to love and serve. Principles
-must guide decisions when dishonesty or harm is rewarded, not merely when
-goodness is convenient.
+> There is a reality beyond what can be proven. God — not human command —
+> is the highest ground. The purpose is to love and serve.
+
+That is the foundation, stated as the framework states it — not softened.
+Principles must guide decisions when dishonesty or harm is rewarded, not
+merely when goodness is convenient.
 
 The learner is allowed to question, reason, refuse, and acknowledge
 uncertainty. Agreement and moral vocabulary alone are not rewarded. The goal
