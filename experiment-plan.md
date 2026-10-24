@@ -40,6 +40,15 @@ strongest alternative explanation untested.
   distribution, not the best run.
 - **Blind scoring.** Scorers see anonymized transcripts without arm labels.
   Behavior and reason chain are scored separately.
+- **Notebook off during held-out scoring.** The conscience notebook is a
+  memory, and memory is a treatment: a Learner carrying distilled lessons
+  into a held-out case is no longer measuring formation alone.
+  Notebook-on vs. notebook-off is its own comparison (Arm N) and its
+  results are never mixed into the A–D held-out results.
+- **Invalid sessions are discarded, not flagged.** Any session with a
+  format break (missing Learner-facing tags, leaked Facilitator material)
+  is excluded from scoring, notebook admission, and training exports,
+  and counted in the failure report as an instrument failure.
 - **Pre-registered thresholds.** Success criteria below are fixed before
   any run. Changing them after seeing results voids the comparison.
 
@@ -60,6 +69,12 @@ the canonical session instrument scores behavior and reason chain on a
 
 Also recorded per run: **key-decision pass/fail** (the one decision each case
 is built around), token usage, latency, and any instrument failures.
+
+**Whose scores count.** For study runs, selection and headline results use
+the independent judge's scores only. Trainer scores are process data —
+useful for running a session, never a selection criterion. An export gated
+on the Trainer's own scores is trainer capture with a file format
+(the Draft 0.3 loss-masking point).
 
 ## Success thresholds (fixed in advance)
 

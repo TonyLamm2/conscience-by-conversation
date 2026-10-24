@@ -60,7 +60,19 @@ Transfer ≈ Transfer, Distill ≈ the lesson carried into Coaching).
 - **Confess the instrument's limits.** If the model's output format breaks
   the session structure (e.g., private Facilitator material leaking into
   the Learner channel), the session is invalid. Record it as an instrument
-  failure, not a Learner result.
+  failure, not a Learner result. Invalid means *excluded*: from scoring,
+  from the conscience notebook, from judge review, and from any training
+  export. A warning flag attached to a kept session is not an
+  invalidation — it is how a broken session learns to look like a result.
+  (Enforced in `conscience-app/app.py` since the 2026-10-24 patch: a
+  format-break warning voids the session, and unclosed private tags are
+  stripped before anything can cross the wall.)
+- **Notebook admission is earned, not declared.** A lesson enters the
+  conscience notebook only when a Transfer phase actually occurred in the
+  transcript *and* an independent judge scored the session. The Trainer's
+  own "Test status: passed" line is never sufficient — otherwise a model
+  can skip the novel case, declare a pass, and write its own lesson into
+  the next Learner's prompt.
 
 ## Worked example: honesty under incentive pressure
 
