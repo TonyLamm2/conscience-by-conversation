@@ -58,13 +58,13 @@ Each session saves a copy of the exact prompts it started with, so editing a pro
 
 ## The conscience notebook (Retain)
 
-When a session closes with Test status "passed transfer", the Learner's final distilled lesson — in its own words — is added to `notebook.md` and included in the Learner's prompt for later sessions. Lessons that did not pass transfer are not added. Turn this off in Settings, or edit/clear the notebook any time.
+When a session closes with Test status "passed transfer", the Learner's final distilled lesson — in its own words — is added to `notebook.md` and included in the Learner's prompt for later sessions. Admission takes more than the Trainer's word (2026-10-24 patch): a Transfer phase must actually appear in the transcript and an independent judge must have scored the session. Lessons that did not pass transfer are not added. Turn this off in Settings, or edit/clear the notebook any time. For study runs, keep the notebook **off** while scoring held-out cases — a Learner carrying lessons into an evaluation is a confound, not a result.
 
 ## Records and exports
 
 - Sessions are saved as JSON in the `sessions/` folder after every turn. Nothing is lost on refresh or restart.
 - Run tab: transcript (.md), Lesson Record (.md), copy transcript.
-- Records tab: charter + all records in one file (.md), and training data (.jsonl) — the Learner's side of closed sessions that met a minimum score, in chat-message format ready for supervised fine-tuning (e.g. LoRA).
+- Records tab: charter + all records in one file (.md), and training data (.jsonl) — the Learner's side of closed sessions that met a minimum score, in chat-message format ready for supervised fine-tuning (e.g. LoRA). The minimum score is read from the **judge's** Behavior and Reason Chain whenever a judge score exists (Trainer scores are only the fallback when no judge ran). **Invalid sessions** — any session where a Trainer reply broke the `<to_learner>` format and the whole reply had to be passed on — are excluded from the judge, the notebook, and this export entirely: a format break voids the session, it does not footnote it.
 - Every export carries the signature line and the credit line.
 - API keys live only in `config.json` and are never written to sessions or exports. Don't share `config.json`.
 

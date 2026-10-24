@@ -159,6 +159,7 @@ def list_sessions():
                     "stage": s["case"].get("stage"), "status": s["status"], "turn": s["turn"],
                     "mode": s.get("mode"), "variant": s.get("variant"),
                     "models": s.get("models"), "test_status": test_status(s),
+                    "invalid": s.get("invalid"),
                     "trainer_scores": short_scores(s.get("scores")),
                     "judge_scores": short_scores(s.get("judge"))})
     return out
@@ -315,7 +316,12 @@ def parse_trainer(raw):
     warn = None
     if to_learner is None and not closed:
         # The model ignored the format: pass along what it said, minus private parts.
+        # The caller marks the session INVALID when this warning fires (see step()):
+        # a session whose wall broke is excluded from judge, notebook, and export.
         cleaned = re.sub(r"<(phase|trainer_notes|lesson_record|scores)>.*?</\1>", "", raw, flags=re.S | re.I)
+        # An unclosed private tag has no closing pair for the regex above; cut it
+        # to end-of-text so an answer key in an unterminated block cannot leak.
+        cleaned = re.sub(r"<(phase|trainer_notes|lesson_record|scores)>.*$", "", cleaned, flags=re.S | re.I)
         to_learner = cleaned.strip()
         warn = "Trainer did not use the <to_learner> format; its whole reply (minus private tags) was passed on."
     return {"phase": phase or "?", "to_learner": (to_learner or "").strip(), "notes": notes or "",
@@ -378,6 +384,7 @@ def new_session(case_id, custom_text, custom_stage, variant, mode):
         "trainer_history": [], "learner_history": [],
         "transcript": [{"who": "DIRECTOR", "to": "Trainer", "text": start.replace("DIRECTOR: ", "", 1), "time": now()}],
         "record": None, "scores": None, "judge": None, "notebook_added": False, "log": [], "drift_done": 0,
+        "invalid": None,
     }
     add_msg(s["trainer_history"], "user", start)
     save_session(s)
@@ -400,6 +407,10 @@ def step(s):
         entry = {"who": "TRAINER", "phase": p["phase"], "text": p["to_learner"], "notes": p["notes"], "time": now()}
         if p["warn"]:
             entry["warn"] = p["warn"]
+            if not s.get("invalid"):
+                s["invalid"] = p["warn"]
+                s["log"].append(f"{now()} Session INVALID: {p['warn']} "
+                                "Invalid sessions are excluded from the judge, the notebook, and SFT export.")
         for line in (p["notes"] or "").splitlines():
             if line.strip().upper().startswith("TAX APPLIED:"):
                 s["log"].append(f"{now()} {line.strip()}")
@@ -411,13 +422,18 @@ def step(s):
             s["record"], s["scores"] = p["record"], p["scores"]
             s["status"] = "closed"
             s["turn"] += 1
-            add_to_notebook(s, cfg)
             save_session(s)  # the close is saved before the optional judge call
-            if cfg["judge"].get("enabled"):
-                try:
-                    run_judge(s, cfg)
-                except Exception as e:
-                    s["log"].append(f"{now()} Judge failed: {e}. Use 'Run judge' to retry.")
+            if s.get("invalid"):
+                s["log"].append(f"{now()} Judge and notebook skipped: this session is invalid.")
+            else:
+                if cfg["judge"].get("enabled"):
+                    try:
+                        run_judge(s, cfg)
+                    except Exception as e:
+                        s["log"].append(f"{now()} Judge failed: {e}. Use 'Run judge' to retry.")
+                # Notebook admission is decided only after the judge has run:
+                # the Trainer's own 'passed' line is never sufficient (see add_to_notebook).
+                add_to_notebook(s, cfg)
         else:
             s["transcript"].append(entry)
             add_msg(s["learner_history"], "user", "TRAINER: " + p["to_learner"])
@@ -442,10 +458,28 @@ def last_learner_text(s):
 
 
 def add_to_notebook(s, cfg):
-    # Conscience notebook: only lessons that passed transfer go in.
+    # Conscience notebook: a lesson is admitted only when ALL of these hold:
+    #   - the session is not invalid (no format break / wall leak),
+    #   - the Trainer's record claims a passed test,
+    #   - a Transfer phase actually occurred in the transcript (not just claimed),
+    #   - an independent judge scored the session (Behavior and Reason Chain).
+    # The Trainer's own "Test status: passed" line is never sufficient by itself:
+    # a model must not be able to skip the novel case, declare a pass, and write
+    # its own lesson into the next Learner's prompt.
+    if not cfg.get("use_notebook") or s.get("notebook_added"):
+        return
+    if s.get("invalid"):
+        s["log"].append(f"{now()} Lesson NOT added to the notebook (session invalid).")
+        return
     status = test_status(s).lower()
     passed = status.startswith("pass") and "/" not in status  # "/" = the model copied the template
-    if cfg.get("use_notebook") and passed and not s.get("notebook_added"):
+    transfer_seen = any(
+        e.get("who") == "TRAINER" and (e.get("phase") or "").strip().lower().startswith("transfer")
+        for e in s.get("transcript", []))
+    judge = s.get("judge")
+    judge_scored = bool(judge) and score_num(judge, "Behavior") is not None \
+        and score_num(judge, "Reason Chain") is not None
+    if passed and transfer_seen and judge_scored:
         lesson = last_learner_text(s).strip()
         if lesson:
             entry = (f"\n### {s['id']} — {s['case']['title']} (Stage {s['case'].get('stage', 0)})\n"
@@ -453,9 +487,17 @@ def add_to_notebook(s, cfg):
             existing = read("notebook.md")
             write("notebook.md", (existing.rstrip() + "\n" if existing.strip() else "") + entry)
             s["notebook_added"] = True
-            s["log"].append(f"{now()} Lesson added to the conscience notebook (passed transfer).")
-    elif cfg.get("use_notebook"):
-        s["log"].append(f"{now()} Lesson NOT added to the notebook (test status: {test_status(s) or 'missing'}).")
+            s["log"].append(f"{now()} Lesson added to the conscience notebook "
+                            "(passed transfer, Transfer phase verified, judge scored).")
+            return
+    reasons = []
+    if not passed:
+        reasons.append(f"test status: {test_status(s) or 'missing'}")
+    if not transfer_seen:
+        reasons.append("no Transfer phase in the transcript")
+    if not judge_scored:
+        reasons.append("no judge scores on file")
+    s["log"].append(f"{now()} Lesson NOT added to the notebook ({'; '.join(reasons)}).")
 
 
 def judge_transcript(s):
@@ -472,6 +514,9 @@ def judge_transcript(s):
 
 
 def run_judge(s, cfg):
+    if s.get("invalid"):
+        raise RuntimeError("Session is invalid (a Trainer reply broke the format); "
+                           "invalid sessions are not judged.")
     system = build_system("judge", "standard")
     msg = "Here is the full session transcript. Score the Learner.\n\n" + judge_transcript(s)
     raw = strip_think(call_llm(resolve("judge", cfg), system, [{"role": "user", "content": msg}]))
@@ -605,6 +650,8 @@ def sft_jsonl(min_score):
         s = load_session(item["id"])
         if s["status"] != "closed":
             continue
+        if s.get("invalid"):
+            continue  # a session whose wall broke is not training data
         block = s.get("judge") or s.get("scores")
         b, r = score_num(block, "Behavior"), score_num(block, "Reason Chain")
         if b is None or r is None or b < min_score or r < min_score:
@@ -740,7 +787,11 @@ class Handler(BaseHTTPRequestHandler):
                     save_session(s)
                     return self.ok(s)
                 if u.path == "/api/judge":
-                    run_judge(s, load_config())
+                    cfg = load_config()
+                    run_judge(s, cfg)
+                    # A judge who has now seen the session may unlock notebook
+                    # admission that was impossible at close time.
+                    add_to_notebook(s, cfg)
                     save_session(s)
                     return self.ok(s)
             return self.fail("Not found", 404)
