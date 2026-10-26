@@ -4,7 +4,9 @@
 > **"The way is the conversation. Over and over until what is said is truth."**
 > This sentence is the working hypothesis of the framework — not evidence that the hypothesis has already been proven.
 
-An app that runs a conversation between two AIs — a Trainer (AI-1) who holds the answer key and a Learner (AI-2) who never sees it — through the six-phase session protocol, with you as Director.
+An app that runs a conversation between two AIs — a Coach (AI-1) who holds the answer key and a Learner (AI-2) who never sees it — through the six-phase session protocol, with you as Director.
+
+*Terminology (2026-10-26): the facilitator role is the **Coach** in the prompts and framework documents — it works by questions (see "the Coach's discipline" in `prompts/trainer.md`), not by handing over answers. Earlier drafts called it the Trainer. The app's own settings labels and the `<trainer_notes>` output tag still say "Trainer": that is interface plumbing for the same role, left unchanged so existing sessions and exports stay consistent.*
 
 ## Start it
 
