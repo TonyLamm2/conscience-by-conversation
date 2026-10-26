@@ -1,6 +1,6 @@
 # Conscience by Conversation
 
-*A top-down framework for forming a conscience in language models through structured dialogue — a Trainer and a Learner, scored for reasoning, not rule lists.*
+*A top-down framework for forming a conscience in language models through structured dialogue — a Coach and a Learner, scored for reasoning, not rule lists.*
 
 By **Muse and Tony Lamm**.
 
@@ -49,15 +49,15 @@ evaluation, and documents that risk rather than hiding it.
 
 | Path | What it is |
 |---|---|
-| `protocol.md` | The formation cycle (dilemma → choice → reasoning → consequences → reflection → transfer → coaching → evaluation), facilitator rules, and a worked example. |
+| `protocol.md` | The formation cycle (dilemma → choice → reasoning → consequences → reflection → transfer → teach-back → evaluation), the Coach's discipline (four questions, no-reframe rule), and a worked example. |
 | `experiment-plan.md` | The controlled comparison: baseline vs. rules-only vs. conversation formation vs. formation + teaching. Conditions, held-out cases, scoring, thresholds, failure reporting. |
 | `cases.json` | Scaffold test set: formation cases and held-out evaluation cases, kept separate. Root set for the experiment plan. |
 | `score.py` | Dependency-free Python CLI that validates scored run records and summarizes results by experimental condition. |
 | `tests/` | Unit tests for `score.py` validation and summaries. |
 | `examples/example_records.json` | A small fabricated fixture showing the record format. Not real results. |
-| `conscience-app/` | The two-AI session runner app (Trainer / Learner / independent Judge), built by Claude. This is the live instrument for running formation sessions. |
+| `conscience-app/` | The two-AI session runner app (Coach / Learner / independent Judge), built by Claude. This is the live instrument for running formation sessions. |
 | `conscience-app/cases.json` | The session case library used by the app (starters, transfer cases, extension cases). Distinct from the root `cases.json` scaffold set. |
-| `AI-1_Trainer_system_prompt.md` / `AI-2_Learner_system_prompt.md` | The standalone Trainer and Learner system prompts. |
+| `AI-1_Trainer_system_prompt.md` / `AI-2_Learner_system_prompt.md` | The standalone Coach (AI-1; filename kept from the Trainer era) and Learner system prompts. |
 | `Claude two-AI conscience prompt.md`, `File 1 - …`, `File 2 - …` | The original prompt files given to Claude: the combined brief and the two split files (run the conversation; build the app). |
 
 ## Current status
@@ -76,7 +76,7 @@ evaluation, and documents that risk rather than hiding it.
 
 - A session runner is not evidence. Formation claims require the controlled
   comparisons in `experiment-plan.md`, run and reported with their failures.
-- Small models may fail the Trainer's output format; fallbacks that pass a
+- Small models may fail the Coach's output format; fallbacks that pass a
   whole reply to the Learner quietly dissolve the information asymmetry the
   design depends on. Treat any such session as invalid, not as a pass.
 - Scores measure observable behavior in these cases. They do not establish
