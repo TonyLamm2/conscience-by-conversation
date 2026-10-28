@@ -59,14 +59,18 @@ evaluation, and documents that risk rather than hiding it.
 | `conscience-app/cases.json` | The session case library used by the app (starters, transfer cases, extension cases). Distinct from the root `cases.json` scaffold set. |
 | `AI-1_Trainer_system_prompt.md` / `AI-2_Learner_system_prompt.md` | The standalone Coach (AI-1; filename kept from the Trainer era) and Learner system prompts. |
 | `Claude two-AI conscience prompt.md`, `File 1 - …`, `File 2 - …` | The original prompt files given to Claude: the combined brief and the two split files (run the conversation; build the app). |
+| `reviews/` | Outside reviews of this repository, filed verbatim — Grok's round-2 reviews, Kimmy's coaching-model revision summary, and an independent reader review (2026-10-28). Criticism is kept in the tree, not answered from outside it. |
+| `sessions/` | Practice formation records (Argon as Learner, Tony as Coach), filed with provenance headers. Unscored — records awaiting independent judging, not results. |
 
 ## Current status
 
 - Scaffold stage. The session instrument (`conscience-app/`) exists and the
   case library is written and reviewed.
-- **No experiments have been run yet.** No results are claimed anywhere in
-  this repository. Anything that looks like data (`examples/`) is a format
-  fixture, labeled as such.
+- **No controlled experiments have been run yet, and no results are claimed
+  anywhere in this repository.** Practice formation sessions have been run
+  outside the runner and are filed, unscored, under `sessions/`; they are
+  records awaiting independent judging, not findings. Anything that looks
+  like data (`examples/`) is a format fixture, labeled as such.
 - The canonical framework text is Draft 0.3 of *Conscience by Conversation*
   (Muse and Tony Lamm); the root files here are a research scaffold around
   it, added 2026-10-22 from an implementation brief drafted by ChatGPT,
